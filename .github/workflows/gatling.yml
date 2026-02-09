@@ -8,7 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Setup GCloud
         uses: google-github-actions/setup-gcloud@v2
@@ -16,8 +17,11 @@ jobs:
           service_account_key: ${{ secrets.GCP_KEY }}
           project_id: YOUR_PROJECT_ID
 
+      - name: Configure Docker auth for GCloud
+        run: gcloud auth configure-docker --quiet
+
       - name: Build Docker image
         run: docker build -t gatling-job .
 
       - name: Run container
-        run: docker run gatling-job
+        run: docker run --rm gatling-job
