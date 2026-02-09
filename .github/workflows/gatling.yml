@@ -1,6 +1,9 @@
 name: Gatling Test
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -8,24 +11,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_KEY }}
 
+      # Setup gcloud CLI
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: gatling-reports
 
+      # Clean old results
+      - name: Clean previous results
+        run: rm -rf results
+
+      # Build Docker image
       - name: Build Docker image
         run: docker build -t gatling-job .
 
+      # Run Gatling container
       - name: Run Gatling
-        run: docker run --rm -v ${{ github.workspace }}/results:/app/results gatling-job
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/results:/app/results \
+            gatling-job
 
+      # Upload reports to GCS
       - name: Upload report to GCS
         run: gsutil cp -r results gs://gatling-reports-deepali-2026/
