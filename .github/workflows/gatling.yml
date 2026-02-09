@@ -11,17 +11,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup GCloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_KEY }}
+
+      - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_KEY }}
-          project_id: YOUR_PROJECT_ID
-
-      - name: Configure Docker auth for GCloud
-        run: gcloud auth configure-docker --quiet
+          project_id: gatling-reports
 
       - name: Build Docker image
         run: docker build -t gatling-job .
 
-      - name: Run container
+      - name: Run Gatling container
         run: docker run --rm gatling-job
