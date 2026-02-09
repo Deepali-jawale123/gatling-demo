@@ -24,5 +24,8 @@ jobs:
       - name: Build Docker image
         run: docker build -t gatling-job .
 
-      - name: Run Gatling container
-        run: docker run --rm gatling-job
+      - name: Run Gatling
+        run: docker run --rm -v ${{ github.workspace }}/results:/app/results gatling-job
+
+      - name: Upload report to GCS
+        run: gsutil cp -r results gs://gatling-reports-deepali-2026/
